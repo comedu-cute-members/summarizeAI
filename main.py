@@ -96,7 +96,7 @@ summary_text_box.grid(row = 0, column = 1, padx = 20, pady = 150, ipadx = 0, ipa
 
 #화살표 이미지 삽입
 arrow_image=tk.PhotoImage(file="arrowimage.png", master=summary_AI)
-arrow_label=tk.Label(summaryAI, image=arrow_image)
+arrow_label=tk.Label(summary_AI, image=arrow_image)
 arrow_label.configure(bg='white')
 arrow_label.place(x=700, y=350)
 
