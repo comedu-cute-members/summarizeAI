@@ -95,7 +95,7 @@ SummaryTextBox.grid(row = 0, column = 1, padx = 20, pady = 150, ipadx = 0, ipady
 
 
 #화살표 이미지 삽입
-ArrowImage=tk.PhotoImage(file="화살표.png", master=SummaryAI)
+ArrowImage=tk.PhotoImage(file="arrowimage.png", master=SummaryAI)
 ArrowLabel=tk.Label(SummaryAI, image=ArrowImage)
 ArrowLabel.configure(bg='white')
 ArrowLabel.place(x=700, y=350)
