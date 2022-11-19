@@ -57,10 +57,10 @@ def help_button_press():
     help_explain = tk.Tk()
     help_explain.geometry("700x400")
     help_explain.title("Help")
-    help_explain_load = tk.Label(help_explain, text="Load: 저장된 텍스트 파일을 풀러오세요.\n\n", font=('Arial',15))
-    help_explain_summary = tk.Label(help_explain, text="Summary: 원문을 요약하려면 Summary버튼을 클릭하세요.\n\n", font=('Arial',15))
-    help_explain_save = tk.Label(help_explain, text="Save: 요약된 텍스트 파일을 원하는 경로에 저장하세요. \n\n", font=('Arial',15))
-    help_explain_quit = tk.Label(help_explain, text="Quit: 프로그램을 종료합니다.", font=('Arial',15))
+    help_explain_load = tk.Label(help_explain, text="\n\n\n\nLoad: 저장된 텍스트 파일을 풀러옵니다.\n\n", font=('Arial',13))
+    help_explain_summary = tk.Label(help_explain, text="Summary: 원문을 요약하려면 Summary버튼을 클릭하세요.\n(시간이 소요됩니다.)\n\n", font=('Arial',13))
+    help_explain_save = tk.Label(help_explain, text="Save: 요약된 텍스트 파일을 원하는 경로에 저장하세요. \n\n", font=('Arial',13))
+    help_explain_quit = tk.Label(help_explain, text="Quit: 프로그램을 종료합니다.", font=('Arial',13))
 
     help_explain_load.pack()
     help_explain_summary.pack()
@@ -82,7 +82,7 @@ summary_text_box = tk.Text(summary_AI)
 summary_text_box.configure(bg='lightgray')
 
 #상단 제목 작성
-summary_AI_title = tk.Label(summary_AI, text="SummaryAI", font=('Arial', 40))
+summary_AI_title = tk.Label(summary_AI, text="Summarize AI", font=('Arial', 40))
 summary_AI_title.place(x=610, y=30)
 summary_AI_title.configure(bg='white')
 
@@ -99,7 +99,7 @@ summary_text_box.grid(row = 0, column = 1, padx = 20, pady = 150, ipadx = 0, ipa
 
 
 #화살표 이미지 삽입
-arrow_image=tk.PhotoImage(file="arrowimage.png", master=summary_AI)
+arrow_image=tk.PhotoImage(file="resources/arrowimage.png", master=summary_AI)
 arrow_label=tk.Label(summary_AI, image=arrow_image)
 arrow_label.configure(bg='white')
 arrow_label.place(x=700, y=350)
