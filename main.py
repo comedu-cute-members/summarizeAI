@@ -73,9 +73,9 @@ summary_AI.title("SummaryAI")
 
 #Text 상자 생성
 original_text_box = tk.Text(summary_AI)
-original_text_box.configure(bg='white')
+original_text_box.configure(bg='lightgray')
 summary_text_box = tk.Text(summary_AI)
-summary_text_box.configure(bg='white')
+summary_text_box.configure(bg='lightgray')
 
 #상단 제목 작성
 summary_AI_title = tk.Label(summary_AI, text="SummaryAI", font=('Arial', 40))
