@@ -103,7 +103,7 @@ arrow_label.place(x=700, y=350)
 #load_button 생성
 load_button = tk.Button(summary_AI, text="Load")
 load_button.place(x=119, y=720)
-load_button.config(width=10, bg='orange')
+load_button.config(width=10, bg='skyblue')
 load_button.config(command=load_button_press)
     
 #summary_button 생성
@@ -115,24 +115,21 @@ summary_button.config(command=summary_button_press)
 #save_button 생성
 save_button = tk.Button(summary_AI, text="Save")
 save_button.place(x=1310, y=720)
-save_button.config(width=10, bg='orange')
+save_button.config(width=10, bg='skyblue')
 save_button.config(command=save_button_press)
 
 #help_button 생성
 help_button = tk.Button(summary_AI, text="Help")
-help_button.place(x=119, y=30)
-help_button.config(width=10, bg='gray')
+help_button.place(x=119, y=755)
+help_button.config(width=10, bg='skyblue')
 help_button.config(command=help_button_press)
 
 #quit_button 생성
 quit_button = tk.Button(summary_AI, text="Quit")
 quit_button.place(x=1310, y=755)
-quit_button.config(width=10, bg='red')
+quit_button.config(width=10, bg='skyblue')
 quit_button.config(command=summary_AI.destroy)
 
 
 
 summary_AI.mainloop()
-
-
-
