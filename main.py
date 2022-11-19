@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import filedialog
 import time
 
+import summarizeAI as summarize_ai
+
 #load_button_command
 def load_button_press():
     original_text_directory = filedialog.askopenfilename(initialdir="/", title="Select file",
@@ -14,8 +16,10 @@ def load_button_press():
 
 #summary_button_command
 def summary_button_press():
-    
-    return
+
+    user_input = original_text_box.get("1.0", tk.END)
+    predicted_output = summarize_ai.predict(user_input)
+    summary_text_box.insert(tk.END, predicted_output)
     
 #save_button_command
 def save_button_press():

@@ -17,111 +17,11 @@ import re
 from tokenizers import BertWordPieceTokenizer
 
 
-# In[2]:
-
-
-"""
-데이터 파싱
-"""
-values = []
-sum_len = []
-def parse_file_content(root_path, is_summary, section, file_count):
-    folder_sort = ["News Articles", "Summaries"]
-
-    if is_summary:
-        index = 1
-    else:
-        index = 0
-   
-    # 파일 열기
-    file_name = ('%d' % file_count).zfill(3) + '.txt'
-    path = "%s/%s/%s/%s" % (root_path, folder_sort[index], section, file_name)
-    file = open(path, 'r')
-
-    # 파일 읽어서 content에 넣기
-    lines = file.readlines()
-    
-    summary = lines[0]
-    sum_len.append(len(summary.split(' ')))
-    lines = lines[1:]
-    
-    content = ''
-    for line in lines:
-        content = content + ' ' + line.strip()
-        content = re.sub(r"([?.!,])", r" \1 ", content)
-        content = re.sub("[^ A-Za-z0-9?.!,$%]+", '', content)
-        content = content.strip()
-
-    # 파일 닫기
-    file.close()
-
-    # 파일 내용 반환
-    return content, summary
-  
-def parse_folder(root_path, section):
-    folder_path = "%s/Summaries/%s/" % (root_path, section)
-    file_list = os.listdir(folder_path)
-    max_file_count = len(file_list)
-  
-    for i in range(1, max_file_count + 1):
-        # Text 데이터 가져오기
-        text, summary = parse_file_content(root_path=root_path, is_summary=False, section=section, file_count=i)
-    
-        # Summary 데이터 가져오기
-        #summary = parse_file_content(root_path=root_path, is_summary=True, section=section, file_count=i)
-
-        # values에 데이터 넣기
-        values.append([text, summary])
-
-# 모든 섹션들 데이터에 넣기
-root_path = "./BBC News Summary"
-parse_folder(root_path, "business")
-parse_folder(root_path, "entertainment")
-parse_folder(root_path, "politics")
-parse_folder(root_path, "sport")
-parse_folder(root_path, "tech")
-
-# 데이터프레임 만들어 csv 파일로 저장
-df = pd.DataFrame(values)
-df.columns = ["Text", "Summary"]
-df.to_csv("News_1.csv", index=False)
-df.to_csv("News_1_text.txt", sep=" ", index=False)
-
-
-# In[31]:
-
-
-"""
-전처리
-"""
-df = pd.read_csv("News.csv")
-
-# print(df)
-print("전체 데이터 갯수 :", len(df))
-# print(df.isnull().sum())
-print(df["Summary"][18]) # UTF-8 인코딩이 유로 표시를 '짙'으로 바꿈, 영어 빼고 제외시킬 예정
-
-
-# In[32]:
-
-
-texts = []
-for content in df['Text']:
-    texts.append(content)
-
-summaries = []
-for content in df['Summary']:
-    summaries.append(content)
-
-print(summaries[0])
 # 단어 모음 생성
 tokenizer = BertWordPieceTokenizer(clean_text=True, lowercase=True)
 tokenizer.train(files="News_text.txt", vocab_size = 8000, special_tokens = [
     "[SOS]", "[EOS]",
 ])
-
-print(tokenizer.encode("[SOS] hi my name is [EOS]").ids)
-print(tokenizer.decode(tokenizer.encode("[SOS] hi my name is [EOS]").ids))
 
 START_TOKEN, END_TOKEN = [0], [1]  # <sos> 와 <eos>
 VOCAB_SIZE = 8000
@@ -129,61 +29,12 @@ VOCAB_SIZE = 8000
 
 # In[33]:
 
-
 MAX_INPUT_LENGTH = 1000
 MAX_OUTPUT_LENGTH = 600
-def tokenize_and_filter(inputs, outputs):
-    tokenized_inputs, tokenized_outputs = [], []
-
-    # 시작 토큰(sos)과 종료 토큰(eos) 포함
-    for (content1, content2) in zip(inputs, outputs):
-        content1 = START_TOKEN + tokenizer.encode(content1).ids + END_TOKEN
-        content2 = START_TOKEN + tokenizer.encode(content2).ids + END_TOKEN
-
-        tokenized_inputs.append(content1)
-        tokenized_outputs.append(content2)
-    
-    # 길이를 1000, 600으로 맞춘다. 더 짧은 배열은 뒤에 0을 추가한다.
-    tokenized_inputs = tf.keras.preprocessing.sequence.pad_sequences(tokenized_inputs, maxlen=MAX_INPUT_LENGTH, padding='post')
-    tokenized_outputs = tf.keras.preprocessing.sequence.pad_sequences(tokenized_outputs, maxlen=MAX_OUTPUT_LENGTH, padding='post')
-
-    return tokenized_inputs, tokenized_outputs
-
-tok_texts, tok_summaries = tokenize_and_filter(texts, summaries)
-
-
-# In[34]:
-
-
-print("기사 데이터의 크기(shape) :", tok_texts.shape)
-print("요약 데이터의 크기(shape) :", tok_summaries.shape)
-
 
 # In[35]:
 
-
 BATCH_SIZE = 32
-BUFFER_SIZE = 20000
-
-dataset = tf.data.Dataset.from_tensor_slices((
-    {
-        'enc_inputs': tok_texts,
-        'dec_inputs': tok_summaries[:, :-1] # 마지막 패딩 0 제거
-    },
-    {
-        'outputs': tok_summaries[:, 1:] # 시작 토큰 제거
-    }
-))
-
-dataset = dataset.cache()
-dataset = dataset.shuffle(BUFFER_SIZE)
-
-test_dataset = dataset.take(49)   # 앞에서 49개를 테스트 데이터로 뺌
-dataset = dataset.skip(49)   # 나머지 2176개가 학습 데이터가 됨
-
-dataset = dataset.batch(BATCH_SIZE)
-dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)  # 메모리 사용을 위한 prefetch
-
 
 # ## transformer 아키텍처 구현
 
@@ -525,62 +376,6 @@ NUM_HEADS = 8
 DFF = 512
 DROPOUT = 0.1
 
-# 인코더와 디코더 반환
-enc = encoder(BATCH_SIZE, VOCAB_SIZE, NUM_LAYERS, DFF, D_MODEL, NUM_HEADS, DROPOUT)
-dec = decoder(BATCH_SIZE, VOCAB_SIZE, NUM_LAYERS, DFF, D_MODEL, NUM_HEADS, DROPOUT)
-
-# 트랜스포머 모델 반환
-model = transformer(enc, dec, VOCAB_SIZE)
-
-
-# In[47]:
-
-
-model.summary()
-
-
-# In[48]:
-
-
-class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
-    def __init__(self, d_model, warmup_steps):
-        super(CustomSchedule, self).__init__()
-        self.d_model = tf.cast(d_model, tf.float32)
-        self.warmup_steps = warmup_steps
-    
-    def __call__(self, step):
-        return tf.math.rsqrt(self.d_model) * tf.math.minimum(step ** 0.5, step * (self.warmup_steps ** -1.5))
-
-
-# In[49]:
-
-
-lr = CustomSchedule(d_model=D_MODEL, warmup_steps=4000) # 학습률
-
-optimizer = tf.keras.optimizers.Adam(
-    learning_rate=lr, beta_1=0.9, beta_2=0.98, epsilon=1e-9
-)
-
-def accuracy(y_true, y_pred):
-    y_true = tf.reshape(y_true, shape=(BATCH_SIZE, MAX_OUTPUT_LENGTH -1))
-
-    return tf.keras.metrics.sparse_categorical_accuracy(y_true, y_pred)
-
-model.compile(optimizer=optimizer, loss=loss_function, metrics=[accuracy])
-
-
-# In[ ]:
-
-
-checkpoint_path = "training/cp.ckpt"
-checkpoint_dir = os.path.dirname(checkpoint_path)
-
-cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
-                                                save_weights_only=True, verbose=1)
-
-EPOCHS=50
-model.fit(dataset, epochs=EPOCHS, callbacks=[cp_callback], verbose=1)
-
 
 # In[51]:
 
@@ -637,33 +432,6 @@ def predict(user_input):
     print('Output:', predicted_output)
 
     return predicted_output
-
-
-# In[54]:
-
-
-article = """Ad sales boost Time Warner profit
-
-Quarterly profits at US media giant TimeWarner jumped 76% to $1.13bn (£600m) for the three months to December, from $639m year-earlier.
-
-The firm, which is now one of the biggest investors in Google, benefited from sales of high-speed internet connections and higher advert sales. TimeWarner said fourth quarter sales rose 2% to $11.1bn from $10.9bn. Its profits were buoyed by one-off gains which offset a profit dip at Warner Bros, and less users for AOL.
-
-Time Warner said on Friday that it now owns 8% of search-engine Google. But its own internet business, AOL, had has mixed fortunes. It lost 464,000 subscribers in the fourth quarter profits were lower than in the preceding three quarters. However, the company said AOL's underlying profit before exceptional items rose 8% on the back of stronger internet advertising revenues. It hopes to increase subscribers by offering the online service free to TimeWarner internet customers and will try to sign up AOL's existing customers for high-speed broadband. TimeWarner also has to restate 2000 and 2003 results following a probe by the US Securities Exchange Commission (SEC), which is close to concluding.
-
-Time Warner's fourth quarter profits were slightly better than analysts' expectations. But its film division saw profits slump 27% to $284m, helped by box-office flops Alexander and Catwoman, a sharp contrast to year-earlier, when the third and final film in the Lord of the Rings trilogy boosted results. For the full-year, TimeWarner posted a profit of $3.36bn, up 27% from its 2003 performance, while revenues grew 6.4% to $42.09bn. "Our financial performance was strong, meeting or exceeding all of our full-year objectives and greatly enhancing our flexibility," chairman and chief executive Richard Parsons said. For 2005, TimeWarner is projecting operating earnings growth of around 5%, and also expects higher revenue and wider profit margins.
-
-TimeWarner is to restate its accounts as part of efforts to resolve an inquiry into AOL by US market regulators. It has already offered to pay $300m to settle charges, in a deal that is under review by the SEC. The company said it was unable to estimate the amount it needed to set aside for legal reserves, which it previously set at $500m. It intends to adjust the way it accounts for a deal with German music publisher Bertelsmann's purchase of a stake in AOL Europe, which it had reported as advertising revenue. It will now book the sale of its stake in AOL Europe as a loss on the value of that stake.
-"""
-
-
-# In[57]:
-
-
-predict(article)
-
-
-# In[ ]:
-
 
 
 
