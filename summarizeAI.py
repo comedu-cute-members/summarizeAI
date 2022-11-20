@@ -19,7 +19,7 @@ from tokenizers import BertWordPieceTokenizer
 
 # 단어 모음 생성
 tokenizer = BertWordPieceTokenizer(clean_text=True, lowercase=True)
-tokenizer.train(files="News_text.txt", vocab_size = 8000, special_tokens = [
+tokenizer.train(files="resources/News_text.txt", vocab_size = 8000, special_tokens = [
     "[SOS]", "[EOS]",
 ])
 
