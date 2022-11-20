@@ -1,4 +1,6 @@
 # summarizeAI
+![image](https://user-images.githubusercontent.com/61264183/202898341-73d0872f-29cc-4179-8a60-db6d9c7a32ed.png)
+
 2017 NIPS \<Attention is All You Need\> 논문에서 제안된 Transformer 아키텍처를 활용한 요약 인공지능 모델입니다.  
 [original paper 📃](https://arxiv.org/abs/1706.03762)
 
